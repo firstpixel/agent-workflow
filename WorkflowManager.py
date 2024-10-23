@@ -20,7 +20,7 @@ class WorkflowManager:
             current_agent = self.agents.get(current_agent_name)
 
             if current_agent is None:
-                print(f" #################################### Agent {current_agent_name} not found!")
+                print(f"Agent {current_agent_name} not found!")
                 continue
 
             # Store the input data for the agent
@@ -29,7 +29,7 @@ class WorkflowManager:
             # Combine inputs if waiting for multiple agents
             combined_input = current_agent.receive_input(input_data)
             if combined_input is None:
-                print(f" #################################### {current_agent_name} is waiting for more inputs...")
+                print(f"{current_agent_name} is waiting for more inputs...")
                 continue  # Skip processing until all inputs are received
 
             # Execute the agent logic, including retries
@@ -42,7 +42,7 @@ class WorkflowManager:
                 for next_agent in next_agents:
                     input_queue.append((next_agent, result["output"]))
             else:
-                print(f" #################################### {current_agent_name} failed after {current_agent.retry_count} retries.")
+                print(f"{current_agent_name} failed after {current_agent.retry_count} retries.")
 
     def _execute_agent_with_retries(self, agent, input_data):
         """Executes an agent with retry logic."""
@@ -51,6 +51,6 @@ class WorkflowManager:
             if result["success"]:
                 return result  # Success, return valid result
             else:
-                print(f" #################################### {agent.name}: Validation failed. Retrying {agent.retry_count}/{agent.retry_limit}")
+                print(f"{agent.name}: Validation failed. Retrying {agent.retry_count}/{agent.retry_limit}")
                 agent.retry_count += 1
         return {"output": None, "success": False}  # Failure after retries
