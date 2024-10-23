@@ -1,7 +1,7 @@
 import ollama
 
 class Agent:
-    def __init__(self, name, model_config, validate_fn=None, llm_fn=None, system="", prompt="", context="", retry_limit=3, expected_inputs=1):
+    def __init__(self, name, model_config, validate_fn=None, tool_fn=None, system="", prompt="", context="", retry_limit=3, expected_inputs=1):
         self.name = name
         self.model_config = model_config
         self.system = system
@@ -12,7 +12,7 @@ class Agent:
         self.expected_inputs = expected_inputs  # Number of inputs expected before processing
         self.received_inputs = []  # To store inputs until all are received
         self.validate_fn = validate_fn if validate_fn else self.default_validate  # Set custom or default validation
-        self.llm_fn = llm_fn if llm_fn else self.default_llm_fn  # Set custom or default LLM function (tool mode)
+        self.tool_fn = tool_fn if tool_fn else self.default_tool_fn  # Set custom or default LLM function (tool mode)
 
     def execute(self, user_input):
         """Agent processes data. This function must be implemented by subclasses."""
@@ -28,6 +28,7 @@ class Agent:
 
     def reset_retry(self):
         """Resets retry count after a successful execution."""
+        
         self.retry_count = 0
 
     def receive_input(self, user_input):
@@ -41,24 +42,27 @@ class Agent:
 
     def default_validate(self, result):
         """Default validation logic. Returns true if 'a' is in the output."""
-        return 1
+        print(" #################################### No vallidate function for agent: ",{self.name})
+        return True
 
-    def default_llm_fn(self, input_data):
-        """Default LLM function to be used as a tool by the agent."""
-        # Basic LLM function that doesn't call ollama
+    def default_tool_fn(self, input_data):
+        """Default TOOL function to be used as a tool by the agent."""
+        # Basic TOOL function that doesn't call ollama
         # This can be overridden by custom functions or tools in specific use cases
-        return f"Processed input: {input_data}"
+        print(" #################################### No tool setup for agent: ",{self.name})
+        return f"{input_data}"
 
 class LLMAgent(Agent):
     def execute(self, user_input):
         """Executes the LLM to process the input using the ollama API."""
-        print("Agent starting: ", self.name, " with input: ", user_input)
+        print(" #################################### Agent starting: ", self.name, " with input: ", user_input)
         combined_input = self.receive_input(user_input)
         if combined_input:
             while self.should_retry():
-                print(f"{self.name}: Processing input using LLM. Retry {self.retry_count + 1}/{self.retry_limit}")
+                print(f" #################################### {self.name}: Processing input using LLM. Retry {self.retry_count + 1}/{self.retry_limit}")
 
                 # Use ollama API for LLM
+                
                 full_prompt = f"{self.context}\n\n{self.prompt}\n\n{combined_input}" if self.context else f"{self.prompt}\n\n{combined_input}"
                 system_prompt = f"{self.system}" if self.system else "You should provide assistance to the user."
 
@@ -66,7 +70,7 @@ class LLMAgent(Agent):
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": full_prompt}
                 ]
-
+                
                 try:
                     response = ollama.chat(
                         model=self.model_config["model"],
@@ -86,29 +90,32 @@ class LLMAgent(Agent):
                 except ollama.ResponseError as e:
                     print('Error:', e.error)
                     if e.status_code == 404:
-                        print("ollama not found")
+                        print(" #################################### ollama not found")
                     return {"output": "Error during LLM call", "success": False}
                 except Exception as e:
-                    print(f"{self.name}: Error during execution - {str(e)}")
+                    print(f" #################################### {self.name}: Error during execution - {str(e)}")
                     return {"output": "Error during LLM call", "success": False}
 
                 # Handle the response structure properly
                 if 'message' in response and 'content' in response['message']:
                     output = response['message']['content'].strip()  # Extract content
-                    print("Response from ollama.chat:", output)
+                    print(" #################################### Response from ollama.chat:", output)
 
                     # Validate the output
                     success = self.validate({"output": output})
 
                     if success:
-                        self.reset_retry()  # Reset retry count on success
+                        # Reset retry count on success
+                        self.reset_retry() 
                         return {"output": output, "success": success}
                     else:
-                        print(f"{self.name}: Validation failed, retrying...")
+                        print(f" #################################### {self.name}: Validation failed, retrying...")
                         self.retry_count += 1  # Increment retry count on failure
-
-            print(f"{self.name}: Retry limit reached. Returning last output.")
+                        # Will loop again to retry
+                        
+                        
+            print(f" #################################### {self.name}: Retry limit reached. Returning last output.")
             return {"output": output, "success": False}
         else:
-            print(f"{self.name}: Waiting for more inputs.")
+            print(f" #################################### {self.name}: Waiting for more inputs.")
             return {"output": None, "success": False}  # Failure after retries
