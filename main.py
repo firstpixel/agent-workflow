@@ -16,11 +16,12 @@ def main():
     # Initialize workflow manager
     manager = WorkflowManager()
 
-    prompt1 = "You must get the user request and do funnel questioning about the subject."
-    prompt2 = "You must answer the more detailed as possible or else you get no cookies."
+    prompt1 = "You must do 'funnel questioning' about the subject."
+    prompt2 = "You must answer the more detailed as possible."
     prompt3 = "You must answer the request as if you are explaining for a 10 year old chield as if you are an youtuber or else you are a failure."
-    prompt4 = "You must answer and check if its the best answer or give a feedback to improove it, telling the missing points, if you think there is nothink else to add and its perfect, you should finish it with a message GREAT_SUCCESS"
-    prompt5 = "You must summarize the text, removing any redundance and leaving it more clear possible."
+    prompt4 = "You must summarize the text, removing any redundance and leaving it as clear as possible."
+
+
 
     # Define LLaMA model configuration
     model_config = {
@@ -29,11 +30,10 @@ def main():
         "top_p": 0.9,
         "frequency_penalty": 0.0,
         "presence_penalty": 0.0,
-        "context": "This is additional context for the LLM.",
     }
 
     # Create LLM agents
-    agent1 = LLMAgent(name="Agent1", model_config=model_config, system=prompt1, retry_limit=3, expected_inputs=1)
+    agent1 = LLMAgent(name="Agent1", model_config=model_config, system=prompt1,  retry_limit=3, expected_inputs=1)
     agent2 = LLMAgent(name="Agent2", model_config=model_config, validate_fn=custom_validate, 
         llm_fn=custom_llm_fn, system=prompt2, retry_limit=3, expected_inputs=1)
     agent3 = LLMAgent(name="Agent3", model_config=model_config, system=prompt3, retry_limit=3, expected_inputs=1)
@@ -47,7 +47,7 @@ def main():
     manager.add_agent(agent4, next_agents=None)  # End of the flow
 
     # Start workflow with initial input
-    initial_input = "Please tell me how to build a code for add rag to a agent with ollama."
+    initial_input = "what is Photosynthesis?"
     
     # Start the workflow
     manager.run_workflow(start_agent_name="Agent1", input_data=initial_input)
