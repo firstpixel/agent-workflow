@@ -140,6 +140,17 @@ cd agent-workflow
 
 Ensure you have the necessary dependencies installed. You might need to install packages such as llama (or any other dependencies related to your LLM agents).
 
+Create a python venv:
+```bash
+python -m venv venv
+source venv/bin/activate
+```
+if you want to deactivate:
+```bash
+deactivate
+```
+
+Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
