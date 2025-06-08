@@ -18,7 +18,21 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
-import ollama
+import os
+
+if os.environ.get("MOCK_OLLAMA") == "1":
+    from mock_ollama import chat as ollama_chat
+else:
+    import ollama
+
+    def ollama_chat(**kwargs):
+        """Wrapper around `ollama.chat` with fallback to the mock implementation."""
+        try:
+            return ollama.chat(**kwargs)
+        except Exception as e:
+            print(f" #################################### Ollama error: {e} - using mock")
+            from mock_ollama import chat as mock_chat
+            return mock_chat(**kwargs)
 
 class Agent:
     def __init__(self, name, model_config, validate_fn=None, llm_fn=None, system="", prompt="", context="", retry_limit=3, expected_inputs=1):
@@ -95,7 +109,7 @@ class LLMAgent(Agent):
         ]
 
         try:
-            response = ollama.chat(
+            response = ollama_chat(
                 model=self.model_config["model"],
                 stream=False,
                 messages=messages,

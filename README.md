@@ -156,9 +156,11 @@ pip install -r requirements.txt
 ```
 ### Run the Workflow:
 
-Execute the main script to start the workflow:
+Execute the main script to start the workflow. If you do not have an Ollama
+server running locally, enable the built-in mock by setting `MOCK_OLLAMA=1`:
 
 ```bash
+# export MOCK_OLLAMA=1  # uncomment to use the mock server
 python main.py
 ```
 ## Contributing
