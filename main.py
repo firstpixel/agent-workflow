@@ -29,12 +29,6 @@ def custom_validate(result):
     return "?" in output.lower() if output else False
 
 def custom_llm_fn(input_data):
-    """Custom LLM function that uses a different API or logic."""
-    print(f" #################################### TOOL EXECUTED  Custom LLM called with input: {input_data}")
-    return f"TOOL EXECUTED  {input_data}"
-
-
-def custom_llm_fn(input_data):
 
     model_config3 = {
         "model": "llama3.2:latest",
