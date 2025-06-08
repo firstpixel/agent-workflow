@@ -34,6 +34,10 @@ class Agent:
         self.validate_fn = validate_fn if validate_fn else self.default_validate
         self.llm_fn = llm_fn if llm_fn else self.default_llm_fn
 
+    def __repr__(self):
+        """Readable representation for debugging."""
+        return f"<{self.__class__.__name__} name={self.name}>"
+
     def execute(self, user_input):
         """Agent processes data. This function must be implemented by subclasses."""
         raise NotImplementedError("Execute method must be implemented by subclasses.")
