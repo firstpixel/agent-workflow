@@ -35,7 +35,7 @@ else:
             return mock_chat(**kwargs)
 
 class Agent:
-    def __init__(self, name, model_config, validate_fn=None, llm_fn=None, system="", prompt="", context="", retry_limit=3, expected_inputs=1):
+    def __init__(self, name, model_config, validate_fn=None, llm_fn=None, system="", prompt="", context="", retry_limit=3, expected_inputs=1, needs_user_input=False):
         self.name = name
         self.model_config = model_config
         self.system = system
@@ -47,6 +47,7 @@ class Agent:
         self.received_inputs = []
         self.validate_fn = validate_fn if validate_fn else self.default_validate
         self.llm_fn = llm_fn if llm_fn else self.default_llm_fn
+        self.needs_user_input = needs_user_input
 
     def __repr__(self):
         """Readable representation for debugging."""
@@ -135,4 +136,58 @@ class LLMAgent(Agent):
         except Exception as e:
             print(f" #################################### Agent {self.name}: Error during execution - {e}")
             return {"output": None, "success": False}
+
+
+class EvolvingAgent(LLMAgent):
+    """LLMAgent with versioning support for MCST evolution."""
+
+    def __init__(self, *, code: str = "", version: str = "v1_0", parent: str = None,
+                 metadata: dict = None, **kwargs):
+        prompt = kwargs.pop("prompt", "")
+        super().__init__(prompt=prompt, **kwargs)
+        self.code = code
+        self.version = version
+        self.parent = parent
+        self.metadata = metadata or {}
+
+    def save(self, agent_path: str, prompt_path: str, metadata_path: str = None):
+        """Persist code, prompt and metadata to disk."""
+        import json
+        import os
+
+        os.makedirs(os.path.dirname(agent_path), exist_ok=True)
+        with open(agent_path, "w") as f:
+            f.write(self.code)
+        with open(prompt_path, "w") as f:
+            f.write(self.prompt)
+        if metadata_path:
+            data = {
+                "version": self.version,
+                "parent": self.parent,
+                "metadata": self.metadata,
+            }
+            with open(metadata_path, "w") as f:
+                json.dump(data, f, indent=2)
+
+    @classmethod
+    def load(cls, agent_path: str, prompt_path: str, metadata_path: str = None, **kwargs):
+        """Load an EvolvingAgent from files."""
+        import json
+        parent = None
+        metadata = {}
+        with open(agent_path, "r") as f:
+            code = f.read()
+        with open(prompt_path, "r") as f:
+            prompt = f.read()
+        if metadata_path and os.path.exists(metadata_path):
+            with open(metadata_path, "r") as f:
+                md = json.load(f)
+                parent = md.get("parent")
+                metadata = md.get("metadata", {})
+                version = md.get("version", "")
+        else:
+            version = kwargs.get("version", "v1_0")
+        return cls(code=code, prompt=prompt, version=version, parent=parent, metadata=metadata,
+                   **kwargs)
+
         
