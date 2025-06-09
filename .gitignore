@@ -1,3 +1,5 @@
 .DS_Store
 __pycache__/
 venv/
+evolution_runs/
+memory_log.json

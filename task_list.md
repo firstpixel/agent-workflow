@@ -80,7 +80,24 @@
 
 ---
 
-### **5. Build Initial Immutable Tools (`tools/`)**
+### **5. Implement Agent & Tool Assignment Step**
+
+* **Description:** Create a dedicated step that assigns the appropriate agent type and tool sequence to each task produced by the TaskLister.
+* **Sample:**
+
+  ```python
+  assignment = assign_agents_and_tools(task_list, tool_registry)
+  ```
+* **Depends on:** 1, 2, 3, 4
+* **Input:** Task list, available agents, available tools
+* **Prompt:** Uses assignment prompt
+* **Output:** Updated tasks with assigned agents and tool sequences
+* **Goal:** Each task specifies which agent to use and which tools to run before and after execution.
+* **Verification:** Generated tasks include valid agent and tool assignments that the workflow can process.
+
+---
+
+### **6. Build Initial Immutable Tools (`tools/`)**
 
 * **Description:** Implement minimal, immutable tool scripts for file I/O, code execution, GitHub commit.
 * **Sample:** `tools/code_executor_tool.py`
@@ -97,7 +114,7 @@
 
 ---
 
-### **6. Implement `EvolvingAgent` Class (agent code/prompt versioning)**
+### **7. Implement `EvolvingAgent` Class (agent code/prompt versioning)**
 
 * **Description:** Handles versioned agent code, prompt, and metadata for MCST. Can load, save, and serialize its state.
 * **Sample:**
@@ -115,7 +132,7 @@
 
 ---
 
-### **7. Implement MCSTExecutor (Evolutionary Tree/Loop)**
+### **8. Implement MCSTExecutor (Evolutionary Tree/Loop)**
 
 * **Description:** Controls branching, mutation, testing, and pruning of agent code, prompt, and tools for each executable task.
 * **Sample:**
@@ -133,7 +150,7 @@
 
 ---
 
-### **8. Build Evolver Agent (Prompt/Code/Tool Mutation via LLM)**
+### **9. Build Evolver Agent (Prompt/Code/Tool Mutation via LLM)**
 
 * **Description:** Use the generic LLMAgent class with a prompt to propose **N diverse mutations** (code, prompt, tool) per MCST branch.
 * **Sample Prompt:**
@@ -150,7 +167,7 @@
 
 ---
 
-### **9. Build Evaluator Agent (LLM or code-based)**
+### **10. Build Evaluator Agent (LLM or code-based)**
 
 * **Description:** Scores candidate outputs (code, results, etc.) against test cases and evaluation criteria.
 * **Sample Prompt:**
@@ -167,7 +184,7 @@
 
 ---
 
-### **10. Build Judge Agent (LLM for Selection/Hybridization)**
+### **11. Build Judge Agent (LLM for Selection/Hybridization)**
 
 * **Description:** Given a set of candidate outputs (branches), chooses the best (or merges/hybridizes as needed).
 * **Sample Prompt:**
@@ -188,7 +205,7 @@
 
 ---
 
-### **11. Implement Versioning and Lineage Tracking**
+### **12. Implement Versioning and Lineage Tracking**
 
 * **Description:** Save all agents/prompts/tools as versioned files with lineage and mutation metadata; log MCST tree.
 * **Sample:**
@@ -207,7 +224,7 @@
 
 ---
 
-### **12. Implement Evolution Log and MCST Tree Serialization**
+### **13. Implement Evolution Log and MCST Tree Serialization**
 
 * **Description:** Persist MCST tree and evolution logs for each run, including all branches, parents, scores, and outcomes.
 * **Sample:**
@@ -224,7 +241,7 @@
 
 ---
 
-### **13. Implement/Integrate Basic MemoryManager**
+### **14. Implement/Integrate Basic MemoryManager**
 
 * **Description:** Log every candidate, score, mutation, and branch for replay, audits, and analysis.
 * **Sample:**
@@ -245,7 +262,7 @@
 
 ---
 
-### **14. Integrate Everything in Main Workflow**
+### **15. Integrate Everything in Main Workflow**
 
 * **Description:** Wire all classes and flows: user input, planning, assignment, MCST per task, evolution, testing, and selection.
 * **Sample:**
@@ -263,7 +280,7 @@
 
 ---
 
-### **15. Validation, Automated Testing, and CI**
+### **16. Validation, Automated Testing, and CI**
 
 * **Description:** Unit tests for each module; scenario tests for end-to-end runs.
 * **Sample:** pytest, unittests, or notebook-based tests.

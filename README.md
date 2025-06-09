@@ -22,87 +22,37 @@ This project provides a simple yet powerful example of how multiple LLM agents c
 
 ## Project Structure
 
-Below is a simplified view of the workflow setup in the project:
+Below is a simplified view of how the current demo configures and runs the workflow:
 
 ```python
 from WorkflowManager import WorkflowManager
 from Agent import LLMAgent
 
-def custom_validate(result):
-    output = result.get("output", "")
-    return "?" in output.lower() if output else False
-
-def custom_llm_fn(input_data):
-    # Custom LLM logic using a different API or prompt
-    print(f" #################################### TOOL EXECUTED  Custom LLM called with input: {input_data}")
-    
-    model_config3 = {
-        "model": "llama3.2:latest",
-        "temperature": 0.7,
-        "top_p": 0.2,
-        "frequency_penalty": 0.0,
-        "presence_penalty": 0.0,
-    }
-    prompt5 = "you just have to say goodbye."
-    agent5 = LLMAgent(name="Agent5", model_config=model_config3, system=prompt5, retry_limit=3, expected_inputs=1)
-    return f"{agent5}"
-
-def main():
-    # Initialize workflow manager
+def build_workflow():
     manager = WorkflowManager()
-
-    # Define prompts for each agent
-    prompt1 = ("You must break the problem into multiple small problems, "
-               "you can do a 'funnel questioning' about the subject, adding 10 questions "
-               "that might help answering the provided question, or you can break into multiple tasks "
-               "to solve the problem, you can add questions like where it was discovered, how it was discovered, "
-               "where it is applied, how it works, locations, dates, main person names involved, everything to add to the question, including history etc.")
-    prompt2 = "You must answer as detailed as possible."
-    prompt3 = "You must answer the request as if you are explaining to a 10-year-old child, as if you are a YouTuber."
-    prompt4 = "You must add missing information, remove redundancy, and make it as clear as possible."
-    prompt5 = "You must provide an abstract, a summary, and a broad detailed explanation."
-
-    # Define model configurations
-    model_config = {
-        "model": "llama3.2:1b",
+    model_cfg = {
+        "model": "llama3.2:latest",
         "temperature": 0.7,
         "top_p": 0.9,
         "frequency_penalty": 0.0,
         "presence_penalty": 0.0,
     }
 
-    model_config2 = {
-        "model": "llama3.2:latest",
-        "temperature": 0.7,
-        "top_p": 0.2,
-        "frequency_penalty": 0.0,
-        "presence_penalty": 0.0,
-    }
+    clarifier = LLMAgent(name="Clarifier", model_config=model_cfg,
+                         system="Ask clarifying questions.", needs_user_input=True)
+    designer = LLMAgent(name="Designer", model_config=model_cfg,
+                        system="Propose a high-level design.")
+    task_maker = LLMAgent(name="TaskMaker", model_config=model_cfg,
+                          system="Break the design into tasks.")
 
-    # Create LLM agents with different roles
-    agent1 = LLMAgent(name="Agent1", model_config=model_config2, validate_fn=custom_validate, system=prompt1, retry_limit=3, expected_inputs=1)
-    agent2 = LLMAgent(name="Agent2", model_config=model_config2, llm_fn=custom_llm_fn, system=prompt2, retry_limit=3, expected_inputs=1)
-    agent3 = LLMAgent(name="Agent3", model_config=model_config2, system=prompt3, retry_limit=3, expected_inputs=1)
-    agent4 = LLMAgent(name="Agent4", model_config=model_config2, system=prompt4, retry_limit=3, expected_inputs=2)
-    agent5 = LLMAgent(name="Agent5", model_config=model_config2, system=prompt5, retry_limit=3, expected_inputs=1)
+    manager.add_agent(clarifier, next_agents=["Designer"])
+    manager.add_agent(designer, next_agents=["TaskMaker"])
+    manager.add_agent(task_maker, next_agents=None)
+    return manager
 
-    # Configure the workflow:
-    # Agent1 forks to Agent2 and Agent3,
-    # both lead into Agent4, which then flows to Agent5.
-    manager.add_agent(agent1, next_agents=["Agent2", "Agent3"])
-    manager.add_agent(agent2, next_agents=["Agent4"])
-    manager.add_agent(agent3, next_agents=["Agent4"])
-    manager.add_agent(agent4, next_agents=["Agent5"])
-    manager.add_agent(agent5, next_agents=None)
-
-    # Define the initial input for the workflow
-    initial_input = "what is Photosynthesis?"
-    
-    # Start the workflow
-    manager.run_workflow(start_agent_name="Agent1", input_data=initial_input)
-
-if __name__ == "__main__":
-    main()
+manager = build_workflow()
+manager.run_workflow(start_agent_name="Clarifier", input_data="Build a web app",
+                     interactive=True)
 ```
 
 ## How It Works
@@ -114,11 +64,9 @@ The WorkflowManager links agents together by specifying which agent(s) should pr
 
 ### Execution Flow:
 
-The workflow starts with an initial input (e.g., "what is Photosynthesis?").
-Agent1 processes the input and, based on its configuration (and custom validation), passes its output to Agent2 and Agent3.
-Agent2 and Agent3 further process the data and feed into Agent4.
-Agent4 refines the combined outputs and finally passes its result to Agent5.
-The final output is generated by Agent5.
+1. **Clarifier** asks questions about the user's request until the requirements are clear.
+2. **Designer** creates a high-level architecture from the clarified request.
+3. **TaskMaker** breaks that design into concrete tasks that can be executed.
 
 ## Customization
 ### Model Configurations:

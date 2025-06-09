@@ -18,11 +18,15 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
+from tool_manager import ToolManager
+
+
 class WorkflowManager:
     def __init__(self):
-        self.agents = {}  # Store agents by name
-        self.connections = {}  # Track agent connections (agent -> next agents)
-        self.pending_inputs = {}  # Track received inputs for each agent
+        self.agents = {}
+        self.connections = {}
+        self.pending_inputs = {}
+        self.tool_manager = ToolManager()
 
     def add_agent(self, agent, next_agents=None):
         """Adds an agent to the workflow, along with its next agents."""
@@ -30,8 +34,16 @@ class WorkflowManager:
         self.connections[agent.name] = next_agents if next_agents else []
         self.pending_inputs[agent.name] = []  # Initialize pending inputs for the agent
 
-    def run_workflow(self, start_agent_name, input_data):
-        """Starts the workflow from the initial agent."""
+    def run_workflow(self, start_agent_name, input_data, interactive=False, user_input_fn=None):
+        """Starts the workflow from the initial agent.
+
+        If ``interactive`` is True and an agent has ``needs_user_input`` set,
+        ``user_input_fn`` will be called with the agent's output to obtain the
+        user's response.
+        """
+        if user_input_fn is None:
+            user_input_fn = input
+
         input_queue = [(start_agent_name, input_data)]  # Queue for agent processing
 
         while input_queue:
@@ -51,6 +63,10 @@ class WorkflowManager:
             # Execute the agent logic, including retries
             result = current_agent.run_with_retries(combined_input)
 
+            if interactive and getattr(current_agent, "needs_user_input", False) and result["success"]:
+                user_response = user_input_fn(f"{result['output']}\n")
+                result["output"] = f"{combined_input} | {user_response}"
+
             # If the result is valid, move to the next agents in the flow
             if result["success"]:
                 current_agent.reset_retry()
@@ -59,3 +75,17 @@ class WorkflowManager:
                     input_queue.append((next_agent, result["output"]))
             else:
                 print(f" #################################### {current_agent_name} failed after {current_agent.retry_count} retries.")
+
+    def run(self, task_list):
+        """Execute a list of Task objects with pre/post tools."""
+        for task in task_list:
+            agent = self.agents.get(task.agent_type)
+            if not agent:
+                print(f"No agent registered for {task.agent_type}")
+                continue
+            data = task.description
+            data = self.tool_manager.run_sequence(task.pre_tools, data)
+            result = agent.run_with_retries(data)
+            data = result["output"] if result["success"] else ""
+            data = self.tool_manager.run_sequence(task.post_tools, data)
+            task.history.append(data)

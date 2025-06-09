@@ -1,98 +1,88 @@
 """
-Licensed under the MIT License given below.
-Copyright (c) 2025 Gil Beyruth
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the “Software”), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-the Software, and to permit persons to whom the Software is furnished to do so,
-subject to the following conditions:
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+Agent Workflow demo entrypoint.
 """
 
-
 from WorkflowManager import WorkflowManager
-from Agent import LLMAgent
+from Agent import LLMAgent, EvolvingAgent
+from task import Task
+from mcst_executor import MCSTExecutor
+from evolver import EvolverAgent
+from evaluator import EvaluatorAgent
+from judge import JudgeAgent
 
 
-def custom_validate(result):
-    # Access the "output" key in the result dictionary and check if "valid" is present
-    output = result.get("output", "")
-    return "?" in output.lower() if output else False
-
-def custom_llm_fn(input_data):
-
-    model_config3 = {
-        "model": "llama3.2:latest",
-        "temperature": 0.7,
-        "top_p": 0.2,
-        "frequency_penalty": 0.0,
-        "presence_penalty": 0.0,
-    }
-    """Custom LLM function that uses a different API or logic."""
-    print(f" #################################### TOOL EXECUTED  Custom LLM called with input: {input_data}")
-    prompt5 = "you just have to say goodbye."
-    agent5 = LLMAgent(name="Agent5", model_config=model_config3, system=prompt5, retry_limit=3, expected_inputs=1)
-
-    return f"{agent5}"
-
-def main():
-    # Initialize workflow manager
+def build_workflow_manager():
+    """Create a WorkflowManager with the standard agents registered."""
     manager = WorkflowManager()
+    from tools.echo_tool import run as echo
+    from tools.uppercase_tool import run as upper
+    from tools.code_executor_tool import run as exec_tool
+    manager.tool_manager.register("echo", echo)
+    manager.tool_manager.register("upper", upper)
+    manager.tool_manager.register("exec", exec_tool)
 
-    prompt1 = "You must break the problem into multiple small problems, you can do a 'funnel questioning' about the subject, adding 10 questions that might help answering the provided question, or you can break into multiple tasks to solve the problem, you can add questions like where it was discovered, how it was discovered, where it is applied, how it works, locations, dates, main person names involved, everything to add to the question, including history etc."
-    prompt2 = "You must answer the more detailed as possible."
-    prompt3 = "You must answer the request as if you are explaining for a 10-year-old child as if you are a YouTuber or else you are a failure."
-    prompt4 = "You must add missing information, removing any redundancy and leaving it as clear as possible."
-    prompt5 = "You must provide a abstract, a summary text, and a broad detailed text explaning it."
-
-    # Define LLaMA model configuration
     model_config = {
-        "model": "llama3.2:1b",
+        "model": "llama3.2:latest",
         "temperature": 0.7,
         "top_p": 0.9,
         "frequency_penalty": 0.0,
         "presence_penalty": 0.0,
     }
 
+    clarifier = LLMAgent(
+        name="Clarifier",
+        model_config=model_config,
+        system="Ask clarifying questions about the user's request.",
+        needs_user_input=True,
+    )
+    designer = LLMAgent(
+        name="Designer",
+        model_config=model_config,
+        system="Propose a high-level design given the clarified requirements.",
+    )
+    task_maker = LLMAgent(
+        name="TaskMaker",
+        model_config=model_config,
+        system="Break the design into concrete implementation tasks.",
+    )
 
-    model_config2 = {
+    manager.add_agent(clarifier, next_agents=["Designer"])
+    manager.add_agent(designer, next_agents=["TaskMaker"])
+    manager.add_agent(task_maker, next_agents=None)
+    return manager
+
+
+def run_demo(user_prompt, interactive=False, user_input_fn=None):
+    manager = build_workflow_manager()
+    start_agent = "Clarifier" if interactive else "Designer"
+    manager.run_workflow(start_agent_name=start_agent, input_data=user_prompt, interactive=interactive, user_input_fn=user_input_fn)
+
+    with open("task_list.md", "r") as f:
+        first_lines = [next(f).strip() for _ in range(10)]
+    print("\nLoaded task list excerpt:\n" + "\n".join(first_lines))
+
+    # Simple MCST demonstration
+    model_config = {
         "model": "llama3.2:latest",
         "temperature": 0.7,
-        "top_p": 0.2,
+        "top_p": 0.9,
         "frequency_penalty": 0.0,
         "presence_penalty": 0.0,
     }
+    evolver = EvolverAgent(name="evolver", model_config=model_config)
+    evaluator = EvaluatorAgent()
+    judge = JudgeAgent()
+    task = Task(description="simple evolution task", pre_tools=["echo"], post_tools=["upper"])
+    base_agent = EvolvingAgent(name="base", model_config=model_config, prompt="say hi", code="print('hi')")
+    executor = MCSTExecutor(branching_factor=2, max_depth=1)
+    best = executor.run(task, base_agent, evolver, evaluator, judge)
+    print(f"Best version: {best.version}")
 
-    # Create LLM agents
-    agent1 = LLMAgent(name="Agent1", model_config=model_config2, validate_fn=custom_validate, system=prompt1, retry_limit=3, expected_inputs=1)
-    agent2 = LLMAgent(name="Agent2", model_config=model_config2, llm_fn=custom_llm_fn, system=prompt2, retry_limit=3, expected_inputs=1)
-    agent3 = LLMAgent(name="Agent3", model_config=model_config2, system=prompt3, retry_limit=3, expected_inputs=1)
-    agent4 = LLMAgent(name="Agent4", model_config=model_config2, system=prompt4, retry_limit=3, expected_inputs=2)
-    agent5 = LLMAgent(name="Agent5", model_config=model_config2, system=prompt5, retry_limit=3, expected_inputs=1)
 
-    # Add agents to the workflow
-    manager.add_agent(agent1, next_agents=["Agent2", "Agent3"])  # Fork: Agent1 -> Agent2, Agent3
-    manager.add_agent(agent2, next_agents=["Agent4"])
-    manager.add_agent(agent3, next_agents=["Agent4"])
-    manager.add_agent(agent4, next_agents=["Agent5"])  # End of the flow
-    manager.add_agent(agent5, next_agents=None)  # End of the flow
+def main():
+    user_prompt = "Build a web app for image classification"
+    run_demo(user_prompt, interactive=False)
 
-    # Start workflow with initial input
-    initial_input = "what is Photosynthesis?"
-    
-    #initial_input = "Explain to me how to build a agent ai system that based on a question, I can have a agent break into multiple tasks, that it can send to other agent that will build a system input for each task to be executed by an llm?"
-    
-    # Start the workflow
-    manager.run_workflow(start_agent_name="Agent1", input_data=initial_input)
 
 if __name__ == "__main__":
     main()
