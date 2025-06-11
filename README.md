@@ -19,6 +19,7 @@ This project provides a simple yet powerful example of how multiple LLM agents c
 - **Custom Validation:** Agents can use custom functions (like `custom_validate`) to ensure that outputs meet certain criteria.
 - **Custom LLM Functions:** Agents can override the default LLM logic with functions like `custom_llm_fn` to implement specialized behavior.
 - **Flexible Configuration:** Easily adjust model parameters, prompts, and the workflow structure to fit your use case.
+- **Evolution Logging:** The optional `MemoryManager` records each evolution step for later analysis.
 
 ## Project Structure
 

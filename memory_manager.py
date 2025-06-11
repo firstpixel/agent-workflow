@@ -9,9 +9,13 @@ class MemoryManager:
                 json.dump([], f)
 
     def add_evolution(self, branch_id, parent_id, code, prompt, tool, score, rationale):
+        """Persist a single evolution step to the log file."""
         entry = {
             "branch_id": branch_id,
             "parent_id": parent_id,
+            "code": code,
+            "prompt": prompt,
+            "tool": tool,
             "score": score,
             "rationale": rationale,
         }

@@ -1,8 +1,9 @@
 import json
 import os
-from typing import List
+from typing import List, Optional
 
 from Agent import EvolvingAgent
+from memory_manager import MemoryManager
 
 
 class MCSTExecutor:
@@ -19,7 +20,15 @@ class MCSTExecutor:
         with open(log_file, "w") as f:
             json.dump(data, f, indent=2)
 
-    def run(self, task, initial_agent: EvolvingAgent, evolver, evaluator, judge):
+    def run(
+        self,
+        task,
+        initial_agent: EvolvingAgent,
+        evolver,
+        evaluator,
+        judge,
+        memory_manager: Optional[MemoryManager] = None,
+    ):
         """Run a toy MCST evolution loop."""
         run_dir = os.path.join(self.work_dir, task.description.replace(" ", "_"))
         tree = {"root": initial_agent.version, "nodes": {initial_agent.version: {"parent": None}}}
@@ -31,10 +40,30 @@ class MCSTExecutor:
             results = []
             for child in children:
                 result = evaluator.evaluate(child)
+                if memory_manager:
+                    memory_manager.add_evolution(
+                        branch_id=child.version,
+                        parent_id=current_agent.version,
+                        code=child.code,
+                        prompt=child.prompt,
+                        tool=None,
+                        score=result,
+                        rationale="auto-generated",
+                    )
                 results.append((child, result))
             winner = judge.choose(results)
             tree["nodes"][winner.version] = {"parent": current_agent.version, "score": winner.metadata.get("score")}
             current_agent = winner
             depth += 1
         self._log(run_dir, tree)
+        if memory_manager:
+            memory_manager.add_evolution(
+                branch_id=current_agent.version,
+                parent_id=current_agent.parent,
+                code=current_agent.code,
+                prompt=current_agent.prompt,
+                tool=None,
+                score=current_agent.metadata.get("score"),
+                rationale="final",
+            )
         return current_agent
