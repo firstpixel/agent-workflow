@@ -9,6 +9,8 @@ from mcst_executor import MCSTExecutor
 from evolver import EvolverAgent
 from evaluator import EvaluatorAgent
 from judge import JudgeAgent
+from assignment import assign_agents_and_tools
+from memory_manager import MemoryManager
 
 
 def build_workflow_manager():
@@ -61,6 +63,12 @@ def run_demo(user_prompt, interactive=False, user_input_fn=None):
         first_lines = [next(f).strip() for _ in range(10)]
     print("\nLoaded task list excerpt:\n" + "\n".join(first_lines))
 
+    # Demonstrate agent and tool assignment
+    demo_tasks = [Task(description="Generate sample code"), Task(description="Echo hello")]
+    assign_agents_and_tools(demo_tasks, manager.tool_manager._tools.keys())
+    for t in demo_tasks:
+        print(f"Assigned to {t.agent_type} with pre {t.pre_tools} and post {t.post_tools}")
+
     # Simple MCST demonstration
     model_config = {
         "model": "llama3.2:latest",
@@ -75,7 +83,8 @@ def run_demo(user_prompt, interactive=False, user_input_fn=None):
     task = Task(description="simple evolution task", pre_tools=["echo"], post_tools=["upper"])
     base_agent = EvolvingAgent(name="base", model_config=model_config, prompt="say hi", code="print('hi')")
     executor = MCSTExecutor(branching_factor=2, max_depth=1)
-    best = executor.run(task, base_agent, evolver, evaluator, judge)
+    memory_manager = MemoryManager()
+    best = executor.run(task, base_agent, evolver, evaluator, judge, memory_manager)
     print(f"Best version: {best.version}")
 
 
