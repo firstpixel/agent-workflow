@@ -1,0 +1,222 @@
+{
+  "summary": {
+    "total_tests": 30,
+    "passed": 30,
+    "failed": 0,
+    "success_rate": 100.0,
+    "timestamp": "2025-08-07T02:30:00.624408"
+  },
+  "test_results": [
+    {
+      "test_name": "Import Dependencies",
+      "passed": true,
+      "message": "All imports successful",
+      "details": {},
+      "timestamp": "2025-08-07T02:30:00.605662"
+    },
+    {
+      "test_name": "Import Dependencies",
+      "passed": true,
+      "message": "Test completed successfully",
+      "details": {},
+      "timestamp": "2025-08-07T02:30:00.605690"
+    },
+    {
+      "test_name": "Agent Creation",
+      "passed": true,
+      "message": "LLMAgent created and executed successfully",
+      "details": {},
+      "timestamp": "2025-08-07T02:30:00.605803"
+    },
+    {
+      "test_name": "Agent Creation",
+      "passed": true,
+      "message": "Test completed successfully",
+      "details": {},
+      "timestamp": "2025-08-07T02:30:00.605814"
+    },
+    {
+      "test_name": "Evolving Agent",
+      "passed": true,
+      "message": "EvolvingAgent save/load functionality works correctly",
+      "details": {},
+      "timestamp": "2025-08-07T02:30:00.606188"
+    },
+    {
+      "test_name": "Evolving Agent",
+      "passed": true,
+      "message": "Test completed successfully",
+      "details": {},
+      "timestamp": "2025-08-07T02:30:00.606206"
+    },
+    {
+      "test_name": "Workflow Manager",
+      "passed": true,
+      "message": "WorkflowManager agent registration works correctly",
+      "details": {},
+      "timestamp": "2025-08-07T02:30:00.606221"
+    },
+    {
+      "test_name": "Workflow Manager",
+      "passed": true,
+      "message": "Test completed successfully",
+      "details": {},
+      "timestamp": "2025-08-07T02:30:00.606227"
+    },
+    {
+      "test_name": "Tool Functionality",
+      "passed": true,
+      "message": "All tools execute correctly",
+      "details": {},
+      "timestamp": "2025-08-07T02:30:00.622517"
+    },
+    {
+      "test_name": "Tool Functionality",
+      "passed": true,
+      "message": "Test completed successfully",
+      "details": {},
+      "timestamp": "2025-08-07T02:30:00.622526"
+    },
+    {
+      "test_name": "Tool Manager",
+      "passed": true,
+      "message": "ToolManager registration and execution works correctly",
+      "details": {},
+      "timestamp": "2025-08-07T02:30:00.622553"
+    },
+    {
+      "test_name": "Tool Manager",
+      "passed": true,
+      "message": "Test completed successfully",
+      "details": {},
+      "timestamp": "2025-08-07T02:30:00.622570"
+    },
+    {
+      "test_name": "Task Functionality",
+      "passed": true,
+      "message": "Task serialization/deserialization works correctly",
+      "details": {},
+      "timestamp": "2025-08-07T02:30:00.622639"
+    },
+    {
+      "test_name": "Task Functionality",
+      "passed": true,
+      "message": "Test completed successfully",
+      "details": {},
+      "timestamp": "2025-08-07T02:30:00.622652"
+    },
+    {
+      "test_name": "Assignment Logic",
+      "passed": true,
+      "message": "Agent and tool assignment works correctly",
+      "details": {},
+      "timestamp": "2025-08-07T02:30:00.622670"
+    },
+    {
+      "test_name": "Assignment Logic",
+      "passed": true,
+      "message": "Test completed successfully",
+      "details": {},
+      "timestamp": "2025-08-07T02:30:00.622679"
+    },
+    {
+      "test_name": "MCST Components",
+      "passed": true,
+      "message": "Evolver, Evaluator, and Judge work correctly",
+      "details": {},
+      "timestamp": "2025-08-07T02:30:00.622719"
+    },
+    {
+      "test_name": "MCST Components",
+      "passed": true,
+      "message": "Test completed successfully",
+      "details": {},
+      "timestamp": "2025-08-07T02:30:00.622731"
+    },
+    {
+      "test_name": "MCST Executor",
+      "passed": true,
+      "message": "MCSTExecutor evolution loop works correctly",
+      "details": {},
+      "timestamp": "2025-08-07T02:30:00.623426"
+    },
+    {
+      "test_name": "MCST Executor",
+      "passed": true,
+      "message": "Test completed successfully",
+      "details": {},
+      "timestamp": "2025-08-07T02:30:00.623451"
+    },
+    {
+      "test_name": "Memory Manager",
+      "passed": true,
+      "message": "MemoryManager logging works correctly",
+      "details": {},
+      "timestamp": "2025-08-07T02:30:00.623666"
+    },
+    {
+      "test_name": "Memory Manager",
+      "passed": true,
+      "message": "Test completed successfully",
+      "details": {},
+      "timestamp": "2025-08-07T02:30:00.623691"
+    },
+    {
+      "test_name": "Workflow Execution",
+      "passed": true,
+      "message": "Complete workflow setup works correctly",
+      "details": {},
+      "timestamp": "2025-08-07T02:30:00.623722"
+    },
+    {
+      "test_name": "Workflow Execution",
+      "passed": true,
+      "message": "Test completed successfully",
+      "details": {},
+      "timestamp": "2025-08-07T02:30:00.623734"
+    },
+    {
+      "test_name": "Mock Ollama",
+      "passed": true,
+      "message": "Mock Ollama responses work correctly",
+      "details": {},
+      "timestamp": "2025-08-07T02:30:00.623744"
+    },
+    {
+      "test_name": "Mock Ollama",
+      "passed": true,
+      "message": "Test completed successfully",
+      "details": {},
+      "timestamp": "2025-08-07T02:30:00.623765"
+    },
+    {
+      "test_name": "Error Handling",
+      "passed": true,
+      "message": "Error handling and retry logic work correctly",
+      "details": {},
+      "timestamp": "2025-08-07T02:30:00.623839"
+    },
+    {
+      "test_name": "Error Handling",
+      "passed": true,
+      "message": "Test completed successfully",
+      "details": {},
+      "timestamp": "2025-08-07T02:30:00.623850"
+    },
+    {
+      "test_name": "File Operations",
+      "passed": true,
+      "message": "File I/O operations work correctly",
+      "details": {},
+      "timestamp": "2025-08-07T02:30:00.623994"
+    },
+    {
+      "test_name": "File Operations",
+      "passed": true,
+      "message": "Test completed successfully",
+      "details": {},
+      "timestamp": "2025-08-07T02:30:00.624010"
+    }
+  ],
+  "failed_tests": []
+}
