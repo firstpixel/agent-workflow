@@ -1,0 +1,102 @@
+{
+  "timestamp": 1754534142.864917,
+  "results": {
+    "agent_creation": {
+      "agents_created": 100,
+      "time_seconds": 0.00010585784912109375,
+      "agents_per_second": 944663.0630630631
+    },
+    "workflow_execution": {
+      "executions": 10,
+      "time_seconds": 0.001068115234375,
+      "executions_per_second": 9362.285714285714
+    },
+    "mcst_performance": [
+      {
+        "config": {
+          "branching_factor": 2,
+          "max_depth": 1
+        },
+        "time_seconds": 0.0004563331604003906,
+        "final_version": "v1_0_0"
+      },
+      {
+        "config": {
+          "branching_factor": 3,
+          "max_depth": 2
+        },
+        "time_seconds": 0.001207590103149414,
+        "final_version": "v1_0_0_0"
+      },
+      {
+        "config": {
+          "branching_factor": 2,
+          "max_depth": 3
+        },
+        "time_seconds": 0.0016460418701171875,
+        "final_version": "v1_0_0_0_0"
+      }
+    ],
+    "concurrent_execution": [
+      {
+        "thread_count": 1,
+        "total_agents": 2,
+        "successful_executions": 0,
+        "time_seconds": 0.10130429267883301
+      },
+      {
+        "thread_count": 2,
+        "total_agents": 4,
+        "successful_executions": 0,
+        "time_seconds": 0.1015784740447998
+      },
+      {
+        "thread_count": 4,
+        "total_agents": 8,
+        "successful_executions": 0,
+        "time_seconds": 0.10199165344238281
+      },
+      {
+        "thread_count": 8,
+        "total_agents": 16,
+        "successful_executions": 0,
+        "time_seconds": 0.10310554504394531
+      }
+    ],
+    "memory_usage": {
+      "error": "psutil not available"
+    },
+    "file_io": {
+      "agents_tested": 50,
+      "save_time_seconds": 0.008307695388793945,
+      "load_time_seconds": 0.0031976699829101562,
+      "saves_per_second": 6018.51628641125,
+      "loads_per_second": 15636.385326573218
+    },
+    "stress_scenarios": {
+      "long_input": {
+        "input_length": 27000,
+        "success": false,
+        "time_seconds": 0.0002560615539550781
+      },
+      "rapid_execution": {
+        "executions": 100,
+        "success_count": 0,
+        "time_seconds": 0.0014050006866455078,
+        "executions_per_second": 71174.34244018327
+      },
+      "deep_mcst": {
+        "max_depth": 4,
+        "branching_factor": 3,
+        "time_seconds": 0.001939535140991211,
+        "final_version": "v1_0_0_0_0_0",
+        "success": true
+      }
+    },
+    "total_test_time": 0.43190813064575195
+  },
+  "summary": {
+    "total_test_time": 0.43190813064575195,
+    "tests_run": 7
+  }
+}
